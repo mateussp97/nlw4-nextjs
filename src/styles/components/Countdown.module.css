@@ -13,7 +13,7 @@
   justify-content: space-evenly;
 
   background: var(--white);
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.08);
   border-radius: 0.5rem;
   font-size: 8.5rem;
   text-align: center;
@@ -52,6 +52,26 @@
   transition: background 0.2s;
 }
 
-.countdownButton:hover {
+.countdownButtonActive {
+  background: var(--white);
+  color: var(--title);
+  box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/*! Hover só será feito se ele não tiver o parâmetro disabled */
+.countdownButtonActive:not(:disabled):hover {
+  background: var(--red) !important;
+  color: var(--white);
+}
+
+/*! Hover só será feito se ele não tiver o parâmetro disabled */
+.countdownButton:not(:disabled):hover {
   background: var(--blue-dark);
+}
+
+.countdownButton:disabled {
+  background: var(--white);
+  color: var(--text);
+  cursor: not-allowed;
+  box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.08);
 }

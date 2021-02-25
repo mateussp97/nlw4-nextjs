@@ -1,18 +1,30 @@
-import React from "react";
+import React, { useContext } from "react";
 //? Import do arquivo .css utilizando o conceito de css modules, que controla quem usa a estilização de cada arquivo css
 import styles from "../styles/components/ExperienceBar.module.css";
+import { ChallengesContext } from "./../contexts/ChallengeContext";
 
 const ExperienceBar = () => {
+  const { currentExperience, experienceToNextLevel } = useContext(
+    ChallengesContext
+  );
+
+  //! Calcula a porcentagem do level, e o Math.round serve só para arredondar o valor
+  const percentToNextLevel =
+    Math.round(currentExperience * 100) / experienceToNextLevel;
+
   return (
     <header className={styles.experienceBar}>
       <span>0 xp</span>
       <div>
-        <div style={{ width: "50%" }} />
-        <span className={styles.currentExperience} style={{ left: "50%" }}>
-          300 xp
+        <div style={{ width: `${percentToNextLevel}%` }} />
+        <span
+          className={styles.currentExperience}
+          style={{ left: `${percentToNextLevel}%` }}
+        >
+          {currentExperience}xp
         </span>
       </div>
-      <span>600 xp</span>
+      <span>{experienceToNextLevel}xp</span>
     </header>
   );
 };
