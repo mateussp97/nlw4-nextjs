@@ -1,5 +1,7 @@
 import { useState, ReactNode, createContext, useEffect } from "react";
+import Cookies from "js-cookie";
 import challenges from "../../challenges.json";
+import LevelUpModal from "../components/LevelUpModal";
 
 interface Challenge {
   type: "body" | "eye";
@@ -17,26 +19,47 @@ interface ChallengesContextData {
   activeChallenge: Challenge;
   resetChallenge: () => void;
   completeChallenge: () => void;
+  closeLevelUpModal: () => void;
 }
 
 interface ChallengesProviderProps {
   children: ReactNode;
+  level: number;
+  currentExperience: number;
+  challengesCompleted: number;
 }
 
 //! Diz que o context segue o formato da interface 'ChallengesContextData', assim conseguimos ver o que está disponível nos imports
 export const ChallengesContext = createContext({} as ChallengesContextData);
 
-export function ChallengesProvider({ children }: ChallengesProviderProps) {
-  const [level, setLevel] = useState(1);
-  const [currentExperience, setCurrentExperience] = useState(0);
-  const [challengesCompleted, setChallengesCompleted] = useState(0);
+//! Passou todas as props tirando children para o objeto 'rest'
+export function ChallengesProvider({
+  children,
+  ...rest
+}: ChallengesProviderProps) {
+  //! Faz a verificação que {Se não existir rest.level, aí assume o valor 1}
+  const [level, setLevel] = useState(rest.level ?? 1);
+  //! Faz a verificação que {Se não existir rest.currentExperience, aí assume o valor 0}
+  const [currentExperience, setCurrentExperience] = useState(
+    rest.currentExperience ?? 0
+  );
+  //! Faz a verificação que {Se não existir rest.challengesCompleted, aí assume o valor 0}
+  const [challengesCompleted, setChallengesCompleted] = useState(
+    rest.challengesCompleted ?? 0
+  );
   const [activeChallenge, setActiveChallenge] = useState(null);
+  const [isLevelUpModalOpen, setIsLevelUpModalOpen] = useState(null);
 
   //! Cálculo do level do usuário
   const experienceToNextLevel = Math.pow((level + 1) * 4, 2);
 
   function levelUp() {
     setLevel(level + 1);
+    setIsLevelUpModalOpen(true);
+  }
+
+  function closeLevelUpModal() {
+    setIsLevelUpModalOpen(false);
   }
 
   //! API do própio Browser para aceitar ou não permissões
@@ -44,6 +67,14 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
   useEffect(() => {
     Notification.requestPermission();
   }, []);
+
+  //! Irá disparar a função sempre que esses 3 parâmetros forem atualizados
+  useEffect(() => {
+    //! Salvando as informações com Cookies, cookie permite salvar apenas String, então transformamos o valor de level em String e salvamos level como level. Assim para os demais...
+    Cookies.set("level", String(level));
+    Cookies.set("currentExperience", String(currentExperience));
+    Cookies.set("challengesCompleted", String(challengesCompleted));
+  }, [level, currentExperience, challengesCompleted]);
 
   function startNewChallenge() {
     //! A variável irá receber um número arredondado(Math.floor) aleatório(Math.random()) entre 0 e o tamanho do Array(challenges.length) 'challenges',
@@ -108,9 +139,11 @@ export function ChallengesProvider({ children }: ChallengesProviderProps) {
         activeChallenge,
         resetChallenge,
         completeChallenge,
+        closeLevelUpModal,
       }}
     >
       {children}
+      {isLevelUpModalOpen && <LevelUpModal />}
     </ChallengesContext.Provider>
   );
 }
